@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="icon" href="favicon.png" />
+  <title>⛏ Mine All Mine</title>
+  <style>
+    /* ── CSS Custom Properties ─────────────────────────────────────────── */
+    :root {
+      --bg:         #0f0a05;
+      --panel:      #1c1208;
+      --border:     #5a3e1b;
+      --border-dim: #3a2810;
+      --text:       #d4b483;
+      --text-bright:#fff8e7;
+      --text-dim:   #7a5c30;
+      --accent:     #ffd700;
+      --accent2:    #ff8c00;
+      --font:       'Courier New', Courier, monospace;
+    }
+
+    /* ── Reset & Base ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    /* ── App Container ─────────────────────────────────────────────────── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      height: 100dvh;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    /* ── Header (desktop only) ─────────────────────────────────────────── */
+    #header {
+      display: none;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      flex-shrink: 0;
+    }
+    #header .header-inner {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    #header .header-title {
+      color: var(--accent);
+      font-size: 1.1rem;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+    #header .header-hint {
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      margin-left: auto;
+    }
+
+    /* ── Status Bar (mobile/tablet) ────────────────────────────────────── */
+    #status-bar {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border-dim);
+      padding: 4px 8px;
+      flex-shrink: 0;
+    }
+    .status-row1 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+    .status-title {
+      color: var(--accent);
+      font-size: 0.75rem;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+    #timer {
+      font-size: 0.75rem;
+      color: var(--text-bright);
+      font-weight: bold;
+    }
+    .status-row2 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    #status-depth {
+      color: var(--accent2);
+      font-size: 0.65rem;
+      font-weight: bold;
+      min-width: 28px;
+    }
+    .status-pick-wrap {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+      min-width: 0;
+    }
+    #status-pick-name {
+      font-size: 0.65rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 90px;
+    }
+    .pick-bar {
+      width: 60px;
+      height: 4px;
+      background: var(--border-dim);
+      border-radius: 2px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .pick-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width 0.2s;
+    }
+    .dur-good { background: #4caf50; }
+    .dur-warn { background: #ff9800; }
+    .dur-crit { background: #f44336; }
+    #status-haul {
+      color: var(--accent);
+      font-size: 0.65rem;
+      font-weight: bold;
+      margin-left: auto;
+    }
+
+    /* ── Main Area ─────────────────────────────────────────────────────── */
+    #main {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ── Canvas Wrap ───────────────────────────────────────────────────── */
+    #canvas-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-width: 0;
+      touch-action: none;
+      overflow: hidden;
+    }
+    #game-canvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      flex-shrink: 0;
+    }
+
+    /* ── Sidebar (desktop only) ────────────────────────────────────────── */
+    #sidebar {
+      display: none;
+      width: 220px;
+      flex-shrink: 0;
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex-direction: column;
+    }
+    .sd-panel {
+      border-bottom: 1px solid var(--border-dim);
+      padding: 8px 10px;
+    }
+    .sd-panel-title {
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+    .sd-stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.7rem;
+      margin-bottom: 3px;
+    }
+    .sd-stat-label { color: var(--text-dim); }
+    .sd-stat-val { color: var(--text-bright); }
+    #sd-depth { color: var(--accent2); }
+    #sd-haul { color: var(--accent); }
+
+    /* Minimap */
+    #minimap-canvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      max-width: 100%;
+    }
+
+    /* Pick panel */
+    #sd-pick-bar-wrap {
+      margin-top: 4px;
+    }
+    #sd-pick-bar-wrap .pick-bar {
+      width: 100%;
+      height: 5px;
+    }
+
+    /* Craft button */
+    #sd-craft-btn {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      padding: 6px 8px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.7rem;
+      cursor: pointer;
+      border-radius: 4px;
+      text-align: center;
+    }
+    #sd-craft-btn:hover { background: rgba(255,215,0,0.08); border-color: var(--accent); }
+    #sd-craft-btn:active { background: rgba(255,215,0,0.15); }
+
+    /* Inventory */
+    #sd-inventory {
+      font-size: 0.68rem;
+    }
+    .inv-empty {
+      color: var(--text-dim);
+      font-style: italic;
+      font-size: 0.68rem;
+    }
+    .inv-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2px 0;
+      border-bottom: 1px solid var(--border-dim);
+    }
+    .inv-dot {
+      width: 9px; height: 9px;
+      border-radius: 0;
+      transform: rotate(45deg);
+      flex-shrink: 0;
+      display: inline-block;
+    }
+    .inv-name { flex: 1; color: var(--text); }
+    .inv-count { color: var(--text-dim); }
+    .inv-value { color: var(--accent); margin-left: auto; }
+
+    /* Log */
+    #sd-log-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      padding: 8px 10px;
+    }
+    #sd-log {
+      flex: 1;
+      overflow-y: auto;
+      font-size: 0.65rem;
+    }
+    .log-entry {
+      padding: 3px 0;
+      border-bottom: 1px solid var(--border-dim);
+      color: var(--text-dim);
+      line-height: 1.3;
+    }
+    .log-entry.log-new { color: var(--text); }
+
+    /* ── Controls Area (mobile/tablet) ─────────────────────────────────── */
+    #controls {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      padding: 4px 0 8px;
+      gap: 4px;
+      touch-action: none;
+    }
+
+    /* Action Bar */
+    #action-bar {
+      display: flex;
+      gap: 8px;
+      padding: 0 12px;
+      width: 100%;
+      touch-action: none;
+    }
+    .action-btn {
+      flex: 1;
+      padding: 8px 4px;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 0.72rem;
+      cursor: pointer;
+      border-radius: 4px;
+      min-height: 44px;
+      text-align: center;
+      touch-action: none;
+    }
+    .action-btn:active { background: rgba(255,215,0,0.1); border-color: var(--accent); }
+
+    /* D-Pad */
+    #dpad {
+      display: grid;
+      grid-template-columns: 56px 56px 56px;
+      grid-template-rows: 56px 56px;
+      gap: 4px;
+      touch-action: none;
+    }
+    .dpad-btn {
+      width: 56px; height: 56px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      font-size: 1.2rem;
+      cursor: pointer;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .dpad-btn:active { background: rgba(255,215,0,0.15); border-color: var(--accent); }
+    .dpad-up    { grid-column: 2; grid-row: 1; }
+    .dpad-left  { grid-column: 1; grid-row: 2; }
+    .dpad-down  { grid-column: 2; grid-row: 2; }
+    .dpad-right { grid-column: 3; grid-row: 2; }
+
+    /* Controls bottom row: minimap left, d-pad right */
+    #controls-bottom {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding: 0 12px;
+      width: 100%;
+      touch-action: none;
+    }
+
+    /* Mobile minimap */
+    #mobile-minimap-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .mobile-minimap-label {
+      font-size: 0.55rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+    #mobile-minimap-canvas {
+      display: block;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      border: 1px solid var(--border-dim);
+      border-radius: 2px;
+    }
+
+    /* ── Overlays & Modals ─────────────────────────────────────────────── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .overlay.hidden { display: none; }
+
+    .overlay-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.82);
+    }
+
+    .modal {
+      position: relative;
+      z-index: 1;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      max-width: 94vw;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-dim);
+      flex-shrink: 0;
+    }
+    .modal-title {
+      color: var(--text-bright);
+      font-size: 0.85rem;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      min-width: 44px;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      font-family: var(--font);
+    }
+    .modal-close:hover { color: var(--text-bright); background: rgba(255,255,255,0.05); }
+    .modal-body {
+      overflow-y: auto;
+      flex: 1;
+      padding: 10px 14px;
+    }
+
+    /* ── Map Modal ─────────────────────────────────────────────────────── */
+    #map-overlay .modal { width: 94vw; max-width: 500px; }
+    #map-modal-content { text-align: center; }
+    #map-modal-canvas {
+      display: block;
+      margin: 0 auto;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      max-width: 100%;
+    }
+
+    /* ── Info Modal ────────────────────────────────────────────────────── */
+    #info-overlay .modal { width: 94vw; max-width: 400px; }
+    .info-section-title {
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+      margin-top: 2px;
+    }
+    .info-divider {
+      border: none;
+      border-top: 1px solid var(--border-dim);
+      margin: 10px 0;
+    }
+    #info-inventory { font-size: 0.72rem; }
+    #info-log {
+      font-size: 0.68rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+
+    /* ── Craft Modal ───────────────────────────────────────────────────── */
+    #craft-overlay .modal { width: 94vw; max-width: 480px; }
+    .craft-current-pick {
+      padding: 8px 0 10px;
+      border-bottom: 1px solid var(--border-dim);
+      margin-bottom: 6px;
+      font-size: 0.75rem;
+      color: var(--text);
+    }
+    .craft-dur-text { color: var(--text-dim); font-size: 0.68rem; }
+    .craft-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 6px;
+      border-bottom: 1px solid var(--border-dim);
+      cursor: pointer;
+      border-radius: 4px;
+      min-height: 44px;
+      touch-action: none;
+    }
+    .craft-row:hover { background: rgba(255,255,255,0.04); }
+    .craft-row-selected { background: rgba(255,215,0,0.08) !important; outline: 1px solid var(--accent); }
+    .craft-row-num {
+      color: var(--text-dim);
+      font-size: 0.65rem;
+      min-width: 14px;
+    }
+    .craft-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .craft-name {
+      font-size: 0.75rem;
+      color: var(--text-bright);
+      flex: 1;
+      min-width: 80px;
+    }
+    .craft-stats-group {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      width: 110px;
+      flex-shrink: 0;
+    }
+    .craft-strikes {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+    }
+    .craft-strength {
+      font-size: 0.65rem;
+      color: var(--text-dim);
+    }
+    .craft-tag {
+      font-size: 0.6rem;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: bold;
+    }
+    .craft-tag-equipped { background: rgba(76,175,80,0.2); color: #4caf50; border: 1px solid #4caf50; }
+    .craft-tag-craft    { background: rgba(255,215,0,0.15); color: var(--accent); border: 1px solid var(--accent); }
+    .craft-ingredients {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 2px;
+    }
+    .craft-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.62rem;
+      padding: 2px 5px;
+      border-radius: 3px;
+    }
+    .craft-chip.have { background: rgba(76,175,80,0.15); color: #4caf50; }
+    .craft-chip.need { background: rgba(244,67,54,0.15); color: #f44336; }
+    .chip-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+    .craft-repair-row { border-top: 1px solid var(--border); margin-top: 4px; }
+    .craft-hint {
+      display: none;
+      padding: 8px 14px;
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--border-dim);
+      text-align: center;
+    }
+
+    /* ── Win Overlay ───────────────────────────────────────────────────── */
+    #win-overlay .modal {
+      border-color: #ffd700;
+      box-shadow: 0 0 24px rgba(255,215,0,0.3);
+      max-width: 360px;
+      width: 94vw;
+    }
+    #win-overlay .modal-title { color: var(--accent); }
+    .end-subtitle {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+    .end-stat {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--border-dim);
+    }
+    .end-stat-label { color: var(--text-dim); }
+    .end-stat-val { color: var(--text-bright); font-weight: bold; }
+    .end-stat-val.gold { color: var(--accent); }
+    #win-record {
+      display: none;
+      font-size: 0.65rem;
+      color: var(--accent);
+      font-weight: bold;
+      margin-left: 6px;
+    }
+    .end-btn {
+      display: block;
+      width: 100%;
+      margin-top: 14px;
+      padding: 12px;
+      background: transparent;
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-family: var(--font);
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 6px;
+      min-height: 48px;
+      letter-spacing: 0.05em;
+    }
+    .end-btn:hover { background: rgba(255,215,0,0.1); }
+    .end-btn:active { background: rgba(255,215,0,0.2); }
+    .end-hint {
+      text-align: center;
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      margin-top: 8px;
+    }
+
+    /* ── Game Over Overlay ─────────────────────────────────────────────── */
+    #gameover-overlay .modal {
+      border-color: #cc2200;
+      box-shadow: 0 0 24px rgba(204,34,0,0.3);
+      max-width: 360px;
+      width: 94vw;
+    }
+    #gameover-overlay .modal-title { color: #ff4422; }
+    #gameover-overlay .end-btn {
+      border-color: #cc2200;
+      color: #ff4422;
+    }
+    #gameover-overlay .end-btn:hover { background: rgba(204,34,0,0.1); }
+
+    /* ── Desktop Layout (> 900px) ──────────────────────────────────────── */
+    @media (min-width: 901px) {
+      #header { display: block; }
+      #status-bar { display: none; }
+      #sidebar {
+        display: flex;
+      }
+      #controls { display: none; }
+      .craft-hint { display: block; }
+    }
+
+    /* ── Tablet Layout (601–900px) ─────────────────────────────────────── */
+    @media (min-width: 601px) and (max-width: 900px) {
+      #status-pick-name { max-width: 140px; }
+      #controls-bottom { justify-content: space-evenly; }
+    }
+
+    /* ── Scrollbar Styling ─────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- Desktop Header -->
+  <div id="header">
+    <div class="header-inner">
+      <span class="header-title">⛏ MINE ALL MINE</span>
+      <span class="header-hint">Move: Arrow Keys / WASD &nbsp;|&nbsp; C Craft &nbsp;|&nbsp; M Map &nbsp;|&nbsp; I Info</span>
+    </div>
+  </div>
+
+  <!-- Mobile Status Bar -->
+  <div id="status-bar">
+    <div class="status-row1">
+      <span class="status-title">⛏ MINE ALL MINE</span>
+      <span id="timer">24h 00m 00s</span>
+    </div>
+    <div class="status-row2">
+      <span id="status-depth">Lv 1</span>
+      <div class="status-pick-wrap">
+        <span id="status-pick-name">Rusty Pick</span>
+        <div class="pick-bar" id="status-pick-bar">
+          <div class="pick-bar-fill dur-good" id="status-pick-bar-fill" style="width:100%"></div>
+        </div>
+      </div>
+      <span id="status-haul">0 ¢</span>
+    </div>
+  </div>
+
+  <!-- Main Game Area -->
+  <div id="main">
+    <!-- Canvas -->
+    <div id="canvas-wrap">
+      <canvas id="game-canvas"></canvas>
+    </div>
+
+    <!-- Desktop Sidebar -->
+    <div id="sidebar">
+
+      <!-- Map Panel -->
+      <div class="sd-panel">
+        <div class="sd-panel-title">Map</div>
+        <canvas id="minimap-canvas" width="180" height="120"></canvas>
+      </div>
+
+      <!-- Status Panel -->
+      <div class="sd-panel">
+        <div class="sd-panel-title">Status</div>
+        <div class="sd-stat-row">
+          <span class="sd-stat-label">Depth</span>
+          <span class="sd-stat-val" id="sd-depth">Level 1</span>
+        </div>
+        <div class="sd-stat-row">
+          <span class="sd-stat-label">Time Left</span>
+          <span class="sd-stat-val" id="sd-time">24h 00m 00s</span>
+        </div>
+        <div class="sd-stat-row">
+          <span class="sd-stat-label">Haul</span>
+          <span class="sd-stat-val" id="sd-haul">0 ¢</span>
+        </div>
+      </div>
+
+      <!-- Pick Panel -->
+      <div class="sd-panel">
+        <div class="sd-panel-title">Pick</div>
+        <div class="sd-stat-row">
+          <span class="sd-stat-label">Equipped</span>
+          <span class="sd-stat-val" id="sd-pick-name">Rusty Pick</span>
+        </div>
+        <div class="sd-stat-row">
+          <span class="sd-stat-label">Durability</span>
+          <span class="sd-stat-val" id="sd-pick-dur">20 / 20</span>
+        </div>
+        <div id="sd-pick-bar-wrap">
+          <div class="pick-bar">
+            <div class="pick-bar-fill dur-good" id="sd-pick-bar-fill" style="width:100%"></div>
+          </div>
+        </div>
+        <button id="sd-craft-btn">⚒ Craft Pick &nbsp;C</button>
+      </div>
+
+      <!-- Inventory Panel -->
+      <div class="sd-panel">
+        <div class="sd-panel-title">Inventory</div>
+        <div id="sd-inventory">
+          <div class="inv-empty">Nothing yet…</div>
+        </div>
+      </div>
+
+      <!-- Log Panel -->
+      <div id="sd-log-panel">
+        <div class="sd-panel-title">Log</div>
+        <div id="sd-log"></div>
+      </div>
+
+    </div><!-- /sidebar -->
+  </div><!-- /main -->
+
+  <!-- Mobile Controls -->
+  <div id="controls">
+    <!-- Action Bar -->
+    <div id="action-bar">
+      <button class="action-btn" id="btn-info">📦 Info</button>
+      <button class="action-btn" id="btn-craft">⚒ Craft</button>
+    </div>
+
+    <!-- Bottom row: mini-map left, d-pad right -->
+    <div id="controls-bottom">
+      <div id="mobile-minimap-wrap">
+        <div class="mobile-minimap-label">🗺 MAP</div>
+        <canvas id="mobile-minimap-canvas"></canvas>
+      </div>
+      <div id="dpad">
+        <button class="dpad-btn dpad-up"    data-dx="0"  data-dy="-1">▲</button>
+        <button class="dpad-btn dpad-left"  data-dx="-1" data-dy="0">◄</button>
+        <button class="dpad-btn dpad-down"  data-dx="0"  data-dy="1">▼</button>
+        <button class="dpad-btn dpad-right" data-dx="1"  data-dy="0">►</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ── Map Modal ──────────────────────────────────────────────────────────── -->
+<div class="overlay hidden" id="map-overlay">
+  <div class="overlay-backdrop"></div>
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🗺 MAP</span>
+      <button class="modal-close" id="map-close">✕</button>
+    </div>
+    <div class="modal-body" id="map-modal-content">
+      <canvas id="map-modal-canvas"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ── Info Modal ─────────────────────────────────────────────────────────── -->
+<div class="overlay hidden" id="info-overlay">
+  <div class="overlay-backdrop"></div>
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">📦 INFO</span>
+      <button class="modal-close" id="info-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="info-section-title">Inventory</div>
+      <div id="info-inventory"><div class="inv-empty">Nothing yet…</div></div>
+      <hr class="info-divider" />
+      <div class="info-section-title">Log</div>
+      <div id="info-log"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Craft Modal ────────────────────────────────────────────────────────── -->
+<div class="overlay hidden" id="craft-overlay">
+  <div class="overlay-backdrop"></div>
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⚒ CRAFT A PICK</span>
+      <button class="modal-close" id="craft-close">✕</button>
+    </div>
+    <div class="modal-body" id="craft-list">
+      <!-- Rendered by JS -->
+    </div>
+    <div class="craft-hint">
+      ↑↓ / W·S navigate &nbsp;·&nbsp; Enter / 1–6 craft &nbsp;·&nbsp; R repair &nbsp;·&nbsp; Esc / C close
+    </div>
+  </div>
+</div>
+
+<!-- ── Win Overlay ────────────────────────────────────────────────────────── -->
+<div class="overlay hidden" id="win-overlay">
+  <div class="overlay-backdrop"></div>
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⛏ HAUL SECURED!</span>
+    </div>
+    <div class="modal-body">
+      <p class="end-subtitle">You made it out with your fortune intact.</p>
+      <div class="end-stat">
+        <span class="end-stat-label">Total Haul</span>
+        <span class="end-stat-val gold"><span id="win-haul">0 ¢</span><span id="win-record">★ NEW RECORD!</span></span>
+      </div>
+      <div class="end-stat">
+        <span class="end-stat-label">Deepest Level</span>
+        <span class="end-stat-val" id="win-depth">1</span>
+      </div>
+      <div class="end-stat">
+        <span class="end-stat-label">Time Used</span>
+        <span class="end-stat-val" id="win-time">0s</span>
+      </div>
+      <div class="end-stat">
+        <span class="end-stat-label">Plays</span>
+        <span class="end-stat-val" id="win-plays">1</span>
+      </div>
+      <div class="end-stat">
+        <span class="end-stat-label">Best Haul</span>
+        <span class="end-stat-val gold" id="win-best">0 ¢</span>
+      </div>
+      <button class="end-btn" id="win-btn">▶ NEW MINE</button>
+      <p class="end-hint">Press Enter or Space to play again</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Game Over Overlay ──────────────────────────────────────────────────── -->
+<div class="overlay hidden" id="gameover-overlay">
+  <div class="overlay-backdrop"></div>
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⏰ TIME'S UP!</span>
+    </div>
+    <div class="modal-body">
+      <p class="end-subtitle">Your light went out in the darkness. The haul is lost.</p>
+      <div class="end-stat">
+        <span class="end-stat-label">Deepest Level</span>
+        <span class="end-stat-val" id="go-depth">1</span>
+      </div>
+      <div class="end-stat">
+        <span class="end-stat-label">Total Haul</span>
+        <span class="end-stat-val">0 ¢</span>
+      </div>
+      <div class="end-stat">
+        <span class="end-stat-label">Plays</span>
+        <span class="end-stat-val" id="go-plays">1</span>
+      </div>
+      <div class="end-stat">
+        <span class="end-stat-label">Best Haul</span>
+        <span class="end-stat-val gold" id="go-best">0 ¢</span>
+      </div>
+      <button class="end-btn" id="go-btn">▶ TRY AGAIN</button>
+      <p class="end-hint">Press Enter or Space to play again</p>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts (load order matters) -->
+<script src="constants.js"></script>
+<script src="map.js"></script>
+<script src="player.js"></script>
+<script src="renderer.js"></script>
+<script src="game.js"></script>
+
+</body>
+</html>
