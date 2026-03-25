@@ -33,7 +33,7 @@ A single-player, browser-based, rogue-like mining adventure rendered on an HTML5
 
 This game is an experiment in vibe coding. Code, text, and gameplay were created mostly by Claude Sonnet 4.6 with sprinklings of Claude Opus 4.6, Amazon Nova Pro, Qwen3-Coder, Devstral 2, Llama 3.2, and a dash of plain old human.
 
-Look and feel was heavily influenced by Chris McCormick's [Rogule](https://rogule.com/). The push-your-luck depth mechanic was inspired by [Deep Sea Adventure](https://oinkgames.com/en/games/analog/deep-sea-adventure/) by Jun Sasaki & Goro Sasaki. Icons were cribbed from the [OpenMoji](https://openmoji.org/) project, specifically the "construction worker" by Lisa Thiel and "rock" by Liz Bravo.
+Look and feel was heavily influenced by Chris McCormick's [Rogule](https://rogule.com/). The push-your-luck depth mechanic was inspired by [Deep Sea Adventure](https://oinkgames.com/en/games/analog/deep-sea-adventure/) by Jun Sasaki & Goro Sasaki.
 
 ---
 

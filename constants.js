@@ -20,13 +20,13 @@ const MINE_COST = 300;
 const MAX_LOG = 8;
 
 const MINERALS = {
-  tin:      { name: 'Tin',      color: '#b0c878', colors: ['#d4e4a8', '#a0bc5e', '#4a5c28'], value: 1,  minDepth: 1, weight: 45 },
-  copper:   { name: 'Copper',   color: '#ff5500', colors: ['#ffbe9e', '#ff8038', '#802d00'], value: 3,  minDepth: 1, weight: 40 },
-  zinc:     { name: 'Zinc',     color: '#e05080', colors: ['#f5a0b8', '#d83870', '#701838'], value: 5,  minDepth: 1, weight: 35 },
-  iron:     { name: 'Iron',     color: '#cc44ff', colors: ['#e59eff', '#d038ff', '#610080'], value: 8, minDepth: 2, weight: 30 },
-  silver:   { name: 'Silver',   color: '#c8c0d8', colors: ['#e0d8f0', '#a8a0c0', '#504868'], value: 15, minDepth: 3, weight: 20 },
-  gold:     { name: 'Gold',     color: '#ffdd00', colors: ['#fff59e', '#ffe138', '#806d00'], value: 25, minDepth: 4, weight: 10 },
-  platinum: { name: 'Platinum', color: '#50d0e8', colors: ['#a8f0ff', '#38c8e0', '#185868'], value: 50, minDepth: 5, weight: 5  }
+  tin:      { name: 'Tin',      color: '#b0c878', value: 1,  minDepth: 1, weight: 45 },
+  copper:   { name: 'Copper',   color: '#ff5500', value: 3,  minDepth: 1, weight: 40 },
+  zinc:     { name: 'Zinc',     color: '#e05080', value: 5,  minDepth: 1, weight: 35 },
+  iron:     { name: 'Iron',     color: '#cc44ff', value: 8,  minDepth: 2, weight: 30 },
+  silver:   { name: 'Silver',   color: '#c8c0d8', value: 15, minDepth: 3, weight: 20 },
+  gold:     { name: 'Gold',     color: '#ffdd00', value: 25, minDepth: 4, weight: 10 },
+  platinum: { name: 'Platinum', color: '#50d0e8', value: 50, minDepth: 5, weight: 5  }
 };
 
 const MINERAL_KEYS = Object.keys(MINERALS);
