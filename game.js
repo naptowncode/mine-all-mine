@@ -150,12 +150,10 @@ class Game {
 
     if (typeof result === 'object' && result.result === 'mined') {
       // Mining attempt
-      if (!result.success && result.mineralKey) {
-        // Trigger particle animation
-        const tx = this.player.x + dx;
-        const ty = this.player.y + dy;
-        this.renderer.addParticle(tx, ty, result.mineralKey);
-      }
+      // Trigger particle animation
+      const tx = this.player.x + dx;
+      const ty = this.player.y + dy;
+      this.renderer.addParticle(tx, ty, result.mineralKey);
       this._updateVisibility();
       this._checkTimeOut();
     } else if (result === 'descend') {
