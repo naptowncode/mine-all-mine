@@ -2,7 +2,7 @@
 
 A single-player, browser-based, rogue-like mining adventure rendered on an HTML5 Canvas. Descend through procedurally generated mine levels, collect valuable minerals, craft progressively better pickaxes, and escape before your light fades and time runs out.
 
-**[Play it now →](https://naptowncode.github.io/mine-all-mine/)** *(or open `index.html` locally — no build step required)*
+**[Play it now →](https://naptowncode.codeberg.page/mine-all-mine/)** *(or open `index.html` locally — no build step required)*
 
 ---
 
@@ -138,13 +138,13 @@ Deeper levels unlock rarer, more valuable minerals:
 
 | Mineral | Color | Value | Available From |
 |---------|-------|-------|----------------|
-| Tin | Steel blue | 1¢ | Level 1 |
-| Copper | Orange | 2¢ | Level 1 |
-| Zinc | Teal | 3¢ | Level 1 |
-| Iron | Purple | 5¢ | Level 2 |
-| Silver | Light gray | 8¢ | Level 3 |
-| Gold | Yellow | 15¢ | Level 4 |
-| Platinum | Cyan | 30¢ | Level 5 |
+| Tin | Yellow-green | 1¢ | Level 1 |
+| Copper | Orange | 3¢ | Level 1 |
+| Zinc | Pink/rose | 5¢ | Level 1 |
+| Iron | Purple | 8¢ | Level 2 |
+| Silver | Lavender | 15¢ | Level 3 |
+| Gold | Yellow | 25¢ | Level 4 |
+| Platinum | Light teal | 50¢ | Level 5 |
 
 Common minerals (Tin, Copper, Zinc) spawn frequently; rare minerals (Gold, Platinum) spawn rarely but are worth far more.
 
@@ -154,18 +154,20 @@ Common minerals (Tin, Copper, Zinc) spawn frequently; rare minerals (Gold, Plati
 
 To mine a rock, simply **walk into it**. Your pick swings automatically.
 
-Each mining attempt costs **5 minutes** of time and has a chance to break through the rock. Harder (more valuable) minerals are tougher to crack:
+Each mining attempt costs **5 minutes** of time and has a chance to break through the rock. The formula is `pickDurability / 10 / mineralValue`, clamped between 2% and 95%. Harder (more valuable) minerals are tougher to crack — and a worn-down pick is less effective. The table below shows approximate break chances with a **fresh Rusty Pick** (durability 20):
 
-| Mineral | Break Chance |
-|---------|-------------|
+| Mineral | Break Chance (Rusty Pick) |
+|---------|--------------------------|
 | Plain rock | 100% (always breaks) |
-| Tin | ~87% |
-| Copper | ~77% |
-| Zinc | ~69% |
-| Iron | ~57% |
-| Silver | ~46% |
-| Gold | ~31% |
-| Platinum | ~18% |
+| Tin (value 1¢) | ~95% |
+| Copper (value 3¢) | ~67% |
+| Zinc (value 5¢) | ~40% |
+| Iron (value 8¢) | ~25% |
+| Silver (value 15¢) | ~13% |
+| Gold (value 25¢) | ~8% |
+| Platinum (value 50¢) | ~4% |
+
+Better picks have higher durability, which directly improves your break chances on tough minerals.
 
 - **Success**: The rock becomes floor, the mineral is added to your inventory, and your pick loses **1 durability**.
 - **Failure**: The rock holds firm, a particle burst animation plays, and your pick loses **0.5 durability**.
@@ -181,12 +183,12 @@ Your pick has a **durability** rating — the number of successful strikes befor
 | Pick | Durability | Notes |
 |------|------------|-------|
 | Rusty Pick | 20 | Starting pick; cannot be crafted or repaired |
-| Stinum Pick | 30 | First craftable pick |
-| Brontix Pick | 50 | — |
-| Zinkon Pick | 80 | — |
-| Ferium Pick | 120 | — |
-| Electovar Pick | 180 | — |
-| Auripetal Pick | 300 | Deepest-level pick |
+| Stinum Pick | 25 | First craftable pick |
+| Brontix Pick | 30 | — |
+| Zinkon Pick | 40 | — |
+| Ferium Pick | 60 | — |
+| Electovar Pick | 90 | — |
+| Auripetal Pick | 150 | Deepest-level pick |
 
 The durability bar in the status bar changes color as your pick wears down:
 
@@ -268,13 +270,13 @@ Both outcomes increment your lifetime **Plays** counter (stored in `localStorage
 
 | Mineral | Hex Color | Value | Min Level | Spawn Weight |
 |---------|-----------|-------|-----------|--------------|
-| Tin | `#aabbcc` | 1¢ | 1 | 45 (most common) |
-| Copper | `#ff5500` | 2¢ | 1 | 40 |
-| Zinc | `#00e5cc` | 3¢ | 1 | 35 |
-| Iron | `#cc44ff` | 5¢ | 2 | 30 |
-| Silver | `#e8e8e8` | 8¢ | 3 | 20 |
-| Gold | `#ffdd00` | 15¢ | 4 | 10 |
-| Platinum | `#00ccff` | 30¢ | 5 | 5 (rarest) |
+| Tin | `#b0c878` | 1¢ | 1 | 45 (most common) |
+| Copper | `#ff5500` | 3¢ | 1 | 40 |
+| Zinc | `#e05080` | 5¢ | 1 | 35 |
+| Iron | `#cc44ff` | 8¢ | 2 | 30 |
+| Silver | `#c8c0d8` | 15¢ | 3 | 20 |
+| Gold | `#ffdd00` | 25¢ | 4 | 10 |
+| Platinum | `#50d0e8` | 50¢ | 5 | 5 (rarest) |
 
 ---
 
@@ -283,12 +285,12 @@ Both outcomes increment your lifetime **Plays** counter (stored in `localStorage
 | Pick | Durability | Recipe | Repair Cost |
 |------|------------|--------|-------------|
 | Rusty Pick *(starter)* | 20 | — | Not repairable |
-| Stinum Pick | 30 | 8 Tin + 2 Copper | 4 Tin + 1 Copper |
-| Brontix Pick | 50 | 2 Tin + 6 Copper + 2 Zinc | 1 Tin + 3 Copper + 1 Zinc |
-| Zinkon Pick | 80 | 4 Copper + 6 Zinc | 2 Copper + 3 Zinc |
-| Ferium Pick | 120 | 2 Zinc + 8 Iron | 1 Zinc + 4 Iron |
-| Electovar Pick | 180 | 6 Iron + 2 Silver + 2 Gold | 3 Iron + 1 Silver + 1 Gold |
-| Auripetal Pick | 300 | 5 Gold + 5 Platinum | 3 Gold + 2 Platinum |
+| Stinum Pick | 25 | 8 Tin + 2 Copper | 4 Tin + 1 Copper |
+| Brontix Pick | 30 | 2 Tin + 6 Copper + 2 Zinc | 1 Tin + 3 Copper + 1 Zinc |
+| Zinkon Pick | 40 | 4 Copper + 6 Zinc | 2 Copper + 3 Zinc |
+| Ferium Pick | 60 | 2 Zinc + 8 Iron | 1 Zinc + 4 Iron |
+| Electovar Pick | 90 | 6 Iron + 2 Silver + 2 Gold | 3 Iron + 1 Silver + 1 Gold |
+| Auripetal Pick | 150 | 5 Gold + 5 Platinum | 3 Gold + 2 Platinum |
 
 ---
 
@@ -321,7 +323,6 @@ mine-all-mine/
 ├── player.js       # Player state, movement, mining, crafting, repair logic
 ├── renderer.js     # Canvas rendering: tiles, player, animations, minimap
 ├── game.js         # Game loop, input handling, UI updates, state management
-├── SPEC.md         # Full behavioral specification (clean-room re-implementation reference)
 └── LICENSE
 ```
 
