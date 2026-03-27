@@ -184,7 +184,7 @@ class Game {
     const chromeBottom = document.getElementById('controls');
     const topH = chromeTop ? chromeTop.offsetHeight : 0;
     const bottomH = (!isDesktop && chromeBottom) ? chromeBottom.offsetHeight : 0;
-    const availableHeight = window.innerHeight - topH - bottomH;
+    const availableHeight = (window.visualViewport ? window.visualViewport.height : window.innerHeight) - topH - bottomH;
 
     const tsFromWidth  = Math.floor(availableWidth  / VIEWPORT_TILES_W);
     const tsFromHeight = Math.floor(availableHeight / VIEWPORT_TILES_H);
