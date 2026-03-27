@@ -17,6 +17,9 @@ class Game {
     this.map = null;
     this.renderer = new Renderer(this.canvas, this.minimapCanvas);
 
+    // Level cache — keyed by depth, stores map state for revisiting
+    this.levelCache = {};
+
     // State
     this.state = 'playing'; // playing, crafting, info, map, win, gameover
     this.craftCursor = 0;
@@ -58,8 +61,10 @@ class Game {
   // ─── Game Start / Reset ───────────────────────────────────────────────────
 
   _startGame() {
+    this.levelCache = {};
     this.player.reset();
     this.map = new GameMap(1);
+    this._saveCurrentLevel();
     const startPos = this.map.getPlayerStartPos();
     this.player.x = startPos.x;
     this.player.y = startPos.y;
@@ -70,13 +75,56 @@ class Game {
     this._updateUI();
   }
 
+  // ─── Level Cache ──────────────────────────────────────────────────────────
+
+  _saveCurrentLevel() {
+    if (!this.map) return;
+    // Deep-copy the mutable arrays so future changes don't affect the snapshot
+    const depth = this.map.depth;
+    this.levelCache[depth] = {
+      tiles:         this.map.tiles.map(row => row.slice()),
+      mineralMap:    this.map.mineralMap.map(row => row.slice()),
+      visited:       this.map.visited.map(row => row.slice()),
+      upLadderPos:   { ...this.map.upLadderPos },
+      downLadderPos: { ...this.map.downLadderPos },
+      rooms:         this.map.rooms  // rooms are never mutated, safe to share
+    };
+  }
+
+  _loadOrCreateLevel(depth) {
+    const cached = this.levelCache[depth];
+    if (cached) {
+      // Generate a fresh map structure then overwrite with saved state
+      const map = new GameMap(depth);
+      map.tiles         = cached.tiles.map(row => row.slice());
+      map.mineralMap    = cached.mineralMap.map(row => row.slice());
+      map.visited       = cached.visited.map(row => row.slice());
+      map.upLadderPos   = { ...cached.upLadderPos };
+      map.downLadderPos = { ...cached.downLadderPos };
+      map.rooms         = cached.rooms;
+      return map;
+    }
+    // No cache — generate a brand new level and immediately cache it
+    const map = new GameMap(depth);
+    this.levelCache[depth] = {
+      tiles:         map.tiles.map(row => row.slice()),
+      mineralMap:    map.mineralMap.map(row => row.slice()),
+      visited:       map.visited.map(row => row.slice()),
+      upLadderPos:   { ...map.upLadderPos },
+      downLadderPos: { ...map.downLadderPos },
+      rooms:         map.rooms
+    };
+    return map;
+  }
+
   // ─── Level Change ─────────────────────────────────────────────────────────
 
   _descend() {
+    this._saveCurrentLevel();
     this.player.depth++;
     this.player.deepestLevel = Math.max(this.player.deepestLevel, this.player.depth);
     this.player.addLog(`Level ${this.player.depth} — deeper into the earth…`);
-    this.map = new GameMap(this.player.depth);
+    this.map = this._loadOrCreateLevel(this.player.depth);
     const pos = this.map.upLadderPos;
     this.player.x = pos.x;
     this.player.y = pos.y;
@@ -89,9 +137,10 @@ class Game {
       this._triggerWin();
       return;
     }
+    this._saveCurrentLevel();
     this.player.depth--;
     this.player.addLog(`Level ${this.player.depth} — heading back up…`);
-    this.map = new GameMap(this.player.depth);
+    this.map = this._loadOrCreateLevel(this.player.depth);
     const pos = this.map.downLadderPos;
     this.player.x = pos.x;
     this.player.y = pos.y;
