@@ -45,7 +45,7 @@ const PICKS = [
     name: 'Stinum Pick',
     durability: 25,
     color: '#b0c878',
-    recipe: { tin: 8, copper: 2 }
+    recipe: { tin: 4, copper: 2 }
   },
   {
     id: 'brontix',
@@ -80,8 +80,7 @@ const PICKS = [
     name: 'Auripetal Pick',
     durability: 150,
     color: '#ffe066',
-    recipe: { gold: 5, platinum: 5 },
-    repairCost: { gold: 3, platinum: 2 }
+    recipe: { gold: 6, platinum: 4 }
   }
 ];
 

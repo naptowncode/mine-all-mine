@@ -2,7 +2,7 @@
 
 A single-player, browser-based, rogue-like mining adventure rendered on an HTML5 Canvas. Descend through procedurally generated mine levels, collect valuable minerals, craft progressively better pickaxes, and escape before your light fades and time runs out.
 
-**[Play it now →](https://naptowncode.codeberg.page/mine-all-mine/)** *(or open `index.html` locally — no build step required)*
+**[Play it now →](https://naptowncode.github.io/mine-all-mine/)** *(or open `index.html` locally — no build step required)*
 
 ---
 
@@ -210,12 +210,12 @@ Open the **⚒ Craft** menu (button on mobile, **C** on keyboard) to craft a new
 
 | Pick | Recipe |
 |------|--------|
-| Stinum Pick | 8 Tin + 2 Copper |
+| Stinum Pick | 4 Tin + 2 Copper |
 | Brontix Pick | 2 Tin + 6 Copper + 2 Zinc |
 | Zinkon Pick | 4 Copper + 6 Zinc |
 | Ferium Pick | 2 Zinc + 8 Iron |
 | Electovar Pick | 6 Iron + 2 Silver + 2 Gold |
-| Auripetal Pick | 5 Gold + 5 Platinum |
+| Auripetal Pick | 6 Gold + 4 Platinum |
 
 Each recipe row in the Craft menu shows ingredient chips colored **green** (you have enough) or **red** (you need more). You can only craft a pick if all ingredients are available.
 
@@ -227,7 +227,7 @@ If your current pick is damaged (but not broken), you can **repair it to full du
 
 | Pick | Repair Cost |
 |------|-------------|
-| Stinum Pick | 4 Tin + 1 Copper |
+| Stinum Pick | 2 Tin + 1 Copper |
 | Brontix Pick | 1 Tin + 3 Copper + 1 Zinc |
 | Zinkon Pick | 2 Copper + 3 Zinc |
 | Ferium Pick | 1 Zinc + 4 Iron |
