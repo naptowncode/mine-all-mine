@@ -223,7 +223,7 @@ class Game {
     const isDesktop = window.innerWidth > 900;
     let availableWidth;
     if (isDesktop) {
-      availableWidth = window.innerWidth - 220 - 16; // sidebar + padding
+      availableWidth = window.innerWidth - 280 - 16; // sidebar + padding
     } else {
       availableWidth = window.innerWidth;
     }
@@ -248,7 +248,7 @@ class Game {
     this._updateStatusBar();
     this._updateSidebar();
     if (this.minimapCanvas) {
-      this.renderer.drawMinimap(this.map, this.player, 3);
+      this.renderer.drawMinimap(this.map, this.player, 4);
     }
     if (this.mobileMinimapCanvas) {
       // On wider viewports (≥601px) the two items are evenly distributed,
