@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mine All Mine — Standalone View Fixture</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0;
+    padding: 24px;
+    background: #101010;
+    color: #d8d0c0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  h1 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #b8a888;
+  }
+  section {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .label {
+    width: 64px;
+    padding-top: 2px;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a7a66;
+  }
+  canvas {
+    display: block;
+    background: #000000;
+    border: 1px solid #3a3226;
+    image-rendering: pixelated;
+  }
+  .note {
+    margin: 0;
+    font-size: 11px;
+    color: #7a6c5a;
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>Standalone View Fixture</h1>
+  <section>
+    <span class="label">World</span>
+    <canvas id="world"></canvas>
+  </section>
+  <section>
+    <span class="label">Minimap</span>
+    <canvas id="minimap"></canvas>
+  </section>
+  <p class="note">Hand-authored presentation data. Only the renderer script is loaded.</p>
+</main>
+
+<!-- Fixture-local display theme. This is not a game-rule script. -->
+<script>
+'use strict';
+
+const TILE = {
+  ROCK: 0,
+  FLOOR: 1,
+  TUNNEL: 2,
+  LADDER_UP: 3,
+  MINERAL: 4,
+  LADDER_DOWN: 5
+};
+
+const VIEWPORT_TILES_W = 18;
+const VIEWPORT_TILES_H = 15;
+
+const DEPTH_PALETTES = [
+  null,
+  {
+    rock: '#393326',
+    rockEdge: '#2e2820',
+    floor: '#69584c',
+    floorAlt: '#605040',
+    tunnel: '#79685c'
+  }
+];
+
+const MINERALS = {
+  tin:    { name: 'Tin',    color: '#b0c878' },
+  copper: { name: 'Copper', color: '#ff5500' },
+  zinc:   { name: 'Zinc',   color: '#e05080' }
+};
+
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+</script>
+
+<script src="renderer.js"></script>
+
+<script>
+'use strict';
+
+// 20 columns x 15 rows. Legend:
+//   # rock, . floor, = tunnel, U up ladder, D down ladder
+//   t tin vein, c copper vein, z zinc vein (veins sit in rock)
+const LAYOUT = [
+  '####################',
+  '#######t###c########',
+  '####..........######',
+  '####..U.......######',
+  '####..........z#####',
+  '####..........######',
+  '#####...====...#####',
+  '#####...====...#####',
+  '#######...==...#####',
+  '######........######',
+  '######..D.....######',
+  '######........######',
+  '####################',
+  '####################',
+  '####################'
+];
+
+// 'v' marks an explored cell; spaces are unexplored.
+const EXPLORED = [
+  '                    ',
+  '       v   v        ',
+  '    vvvvvvvvvv      ',
+  '    vvvvvvvvvv      ',
+  '    vvvvvvvvvvv     ',
+  '    vvvvvvvvvv      ',
+  '     vvvvvvvvvv     ',
+  '     vvvvvvvvvv     ',
+  '       vvvvvvvv     ',
+  '      vvvv          ',
+  '      vvvv          ',
+  '      vvvv          ',
+  '                    ',
+  '                    ',
+  '                    '
+];
+
+const LAYOUT_TILES = {
+  '#': TILE.ROCK,
+  '.': TILE.FLOOR,
+  '=': TILE.TUNNEL,
+  U: TILE.LADDER_UP,
+  D: TILE.LADDER_DOWN
+};
+
+const LAYOUT_MINERALS = {
+  t: 'tin',
+  c: 'copper',
+  z: 'zinc'
+};
+
+const tiles = [];
+const mineralMap = [];
+const visited = [];
+
+for (let y = 0; y < LAYOUT.length; y++) {
+  tiles[y] = [];
+  mineralMap[y] = [];
+  visited[y] = [];
+
+  for (let x = 0; x < LAYOUT[y].length; x++) {
+    const char = LAYOUT[y][x];
+    const mineralKey = LAYOUT_MINERALS[char];
+
+    tiles[y][x] = mineralKey ? TILE.ROCK : LAYOUT_TILES[char];
+    mineralMap[y][x] = mineralKey || null;
+    visited[y][x] = EXPLORED[y][x] === 'v';
+  }
+}
+
+const map = {
+  depth: 1,
+  width: LAYOUT[0].length,
+  height: LAYOUT.length,
+  tiles,
+  mineralMap,
+  visited,
+  upLadderPos: { x: 6, y: 3 },
+  downLadderPos: { x: 8, y: 10 },
+  getTile(x, y) {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) return null;
+    return this.tiles[y][x];
+  },
+  getMineral(x, y) {
+    if (x < 0 || x >= this.width || y < 0 || y >= this.height) return null;
+    return this.mineralMap[y][x];
+  },
+  isVisible(px, py, tx, ty, radius) {
+    const dx = tx - px;
+    const dy = ty - py;
+    return dx * dx + dy * dy <= radius * radius;
+  }
+};
+
+const player = {
+  x: 6,
+  y: 3,
+  depth: 1,
+  getVisibilityRadius() {
+    return 6;
+  }
+};
+
+const renderer = new Renderer(
+  document.getElementById('world'),
+  document.getElementById('minimap')
+);
+
+renderer.setTileSize(24);
+renderer.draw(map, player, 'playing');
+renderer.drawMinimap(map, player, 4);
+</script>
+</body>
+</html>

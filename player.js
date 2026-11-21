@@ -1,7 +1,11 @@
 // player.js — Player state and actions
 
 class Player {
-  constructor() {
+  constructor(rng) {
+    if (!rng || typeof rng.next !== 'function') {
+      throw new TypeError('Player requires a seeded rng');
+    }
+    this.rng = rng;
     this.reset();
   }
 
@@ -100,7 +104,7 @@ class Player {
     }
 
     const prevDurability = this.pickDurability;
-    const success = Math.random() < breakChance;
+    const success = this.rng.next() < breakChance;
 
     if (success) {
       // Rock breaks

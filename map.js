@@ -1,8 +1,12 @@
 // map.js — Map and level generation
 
 class GameMap {
-  constructor(depth) {
+  constructor(depth, rng) {
+    if (!rng || typeof rng.next !== 'function' || typeof rng.int !== 'function' || typeof rng.shuffle !== 'function') {
+      throw new TypeError('GameMap requires a seeded rng');
+    }
     this.depth = depth;
+    this.rng = rng;
     this.width = MAP_WIDTH;
     this.height = MAP_HEIGHT;
     this.tiles = [];
@@ -33,16 +37,16 @@ class GameMap {
   }
 
   _generateRooms() {
-    const targetRooms = rng(6, 12);
+    const targetRooms = this.rng.int(6, 12);
     const maxAttempts = 300;
     let attempts = 0;
 
     while (this.rooms.length < targetRooms && attempts < maxAttempts) {
       attempts++;
-      const w = rng(5, 12);
-      const h = rng(4, 9);
-      const x = rng(1, this.width - w - 2);
-      const y = rng(1, this.height - h - 2);
+      const w = this.rng.int(5, 12);
+      const h = this.rng.int(4, 9);
+      const x = this.rng.int(1, this.width - w - 2);
+      const y = this.rng.int(1, this.height - h - 2);
 
       const newRoom = this._generateIrregularRoom(x, y, w, h);
 
@@ -59,7 +63,7 @@ class GameMap {
   _generateIrregularRoom(bx, by, bw, bh) {
     const cx = bx + Math.floor(bw / 2);
     const cy = by + Math.floor(bh / 2);
-    const targetCount = Math.max(4, Math.floor(bw * bh * (0.55 + Math.random() * 0.25)));
+    const targetCount = Math.max(4, Math.floor(bw * bh * (0.55 + this.rng.next() * 0.25)));
 
     const cells = new Set();
     const cellKey = (x, y) => `${x},${y}`;
@@ -70,11 +74,11 @@ class GameMap {
     const dirs = [[0,-1],[0,1],[-1,0],[1,0]];
 
     while (frontier.length > 0 && cells.size < targetCount) {
-      const idx = Math.floor(Math.random() * frontier.length);
+      const idx = Math.floor(this.rng.next() * frontier.length);
       const [fx, fy] = frontier[idx];
 
       // Shuffle directions
-      const shuffled = dirs.slice().sort(() => Math.random() - 0.5);
+      const shuffled = this.rng.shuffle(dirs.slice());
       let expanded = false;
 
       for (const [dx, dy] of shuffled) {
@@ -91,7 +95,7 @@ class GameMap {
         const ddy = ny - (by + bh / 2);
         const distSq = ddx * ddx + ddy * ddy;
         const acceptProb = 0.4 + 0.6 * (1 - distSq / maxDistSq);
-        if (Math.random() > acceptProb) continue;
+        if (this.rng.next() > acceptProb) continue;
 
         cells.add(cellKey(nx, ny));
         frontier.push([nx, ny]);
@@ -148,7 +152,7 @@ class GameMap {
   }
 
   _carveTunnel(x1, y1, x2, y2) {
-    const horizontal_first = Math.random() < 0.5;
+    const horizontal_first = this.rng.next() < 0.5;
 
     if (horizontal_first) {
       this._carveHorizontal(x1, x2, y1);
@@ -262,16 +266,12 @@ class GameMap {
       }
     }
 
-    // Fisher-Yates shuffle
-    for (let i = candidates.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
-    }
+    this.rng.shuffle(candidates);
 
     const toPlace = Math.min(count, candidates.length);
     for (let i = 0; i < toPlace; i++) {
       const [x, y] = candidates[i];
-      const mineralKey = pool[Math.floor(Math.random() * pool.length)];
+      const mineralKey = pool[this.rng.int(0, pool.length - 1)];
       this.mineralMap[y][x] = mineralKey;
     }
   }
