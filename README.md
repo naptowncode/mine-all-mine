@@ -285,12 +285,12 @@ Both outcomes increment your lifetime **Plays** counter (stored in `localStorage
 | Pick | Durability | Recipe | Repair Cost |
 |------|------------|--------|-------------|
 | Rusty Pick *(starter)* | 20 | — | Not repairable |
-| Stinum Pick | 25 | 8 Tin + 2 Copper | 4 Tin + 1 Copper |
+| Stinum Pick | 25 | 4 Tin + 2 Copper | 2 Tin + 1 Copper |
 | Brontix Pick | 30 | 2 Tin + 6 Copper + 2 Zinc | 1 Tin + 3 Copper + 1 Zinc |
 | Zinkon Pick | 40 | 4 Copper + 6 Zinc | 2 Copper + 3 Zinc |
 | Ferium Pick | 60 | 2 Zinc + 8 Iron | 1 Zinc + 4 Iron |
 | Electovar Pick | 90 | 6 Iron + 2 Silver + 2 Gold | 3 Iron + 1 Silver + 1 Gold |
-| Auripetal Pick | 150 | 5 Gold + 5 Platinum | 3 Gold + 2 Platinum |
+| Auripetal Pick | 150 | 6 Gold + 4 Platinum | 3 Gold + 2 Platinum |
 
 ---
 
